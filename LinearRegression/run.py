@@ -5,12 +5,20 @@
 """
 
 import numpy as np
+from plot_tookit import PlotToolkit
 
 class Linear_Regression_Model:
     def __init__(self):
         # 初始化模型参数
         self.w = 0.0
         self.b = 0.0
+
+        # 保存训练过程信息，用于绘图
+        self.loss_history = []
+        self.w_history = []
+        self.b_history = []
+        self.dw_history = []
+        self.db_history = []
 
     def predict(self, X):
         # 预测函数
@@ -30,27 +38,61 @@ class Linear_Regression_Model:
             # 更新参数
             self.w -= lr * dw
             self.b -= lr * db
+
+            # 计算并记录损失
+            loss = np.mean((Y - Y_pred) ** 2)
+            self.loss_history.append(loss)
+            self.w_history.append(self.w)
+            self.b_history.append(self.b)
+            self.dw_history.append(dw)
+            self.db_history.append(db)
             if epoch % log_interval == 0 or epoch == epochs - 1:
-                loss = np.mean((Y - Y_pred) ** 2)
                 print(f"Epoch {epoch}, Loss: {loss:.4f}, w: {self.w:.4f}, b: {self.b:.4f}")
 
         
-def make_LinearData(Sample_num: int, Feature_dim : int = 1, Noise_level: float = 0.0):
+def make_LinearData(Sample_num: int, Feature_dim : int = 1, Noise_level: float = 0.0, set_w: float = 4.57, set_b: float = 0.64):
     """
     生成线性回归数据集
     """
     X = np.random.rand(Sample_num, Feature_dim) * 10
-    Y = 4.57 * X + 0.64 + Noise_level * np.random.randn(Sample_num, Feature_dim)
+    Y = set_w * X + set_b + Noise_level * np.random.randn(Sample_num, Feature_dim)
     return X, Y
 
 # 主函数
 def main():
-    # 固定随机种子，确保结果可复现
+    # 设置超参数
+    hyperparams = {
+        # 数据
+        "set_w": 4.57,
+        "set_b": 0.64,
+        "sample_num": 100,
+        "feature_dim": 1,
+        "noise_level": 0.1,
+        # 训练
+        "lr": 1e-3,
+        "epochs": 100,
+        "log_interval": 5,
+        "seed": 42
+    }
+        # 固定随机种子，确保结果可复现
     np.random.seed(42)
-    X, Y = make_LinearData(100, 1, 0.1)
-    model = Linear_Regression_Model()
-    model.fit(X, Y, lr=1e-6, epochs=500000, log_interval=5000)
+    # 生成数据集并训练模型
+    set_w, set_b = hyperparams["set_w"], hyperparams["set_b"]
+    sample_num, feature_dim = hyperparams["sample_num"], hyperparams["feature_dim"]
+    X, Y = make_LinearData(sample_num, feature_dim, hyperparams["noise_level"], set_w=set_w, set_b=set_b)
+    
+    # 训练模型
+    lr, epochs = hyperparams["lr"], hyperparams["epochs"]
+    if feature_dim == 1:
+        model = Linear_Regression_Model()
+    else:         # 多变量线性回归模型
+        print("Only single variable linear regression is supported.")
+        return
     print(f"Trained parameters: w = {model.w}, b = {model.b}")
+
+    # 画图
+    plot_toolkit = PlotToolkit()
+    plot_toolkit.plot_regression_results(X, Y, model, hyperparams)
 
 if __name__ == "__main__":
     main()
