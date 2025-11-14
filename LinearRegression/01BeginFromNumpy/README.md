@@ -4,12 +4,12 @@
 
 核心目标：通过拟合线性函数让模型的预测结果尽可能接近真实数据。
 
-* 线性函数：$y = WX + B$，其中x可为标量，也可为向量。
+* 线性函数： $y = WX + B$，其中x可为标量，也可为向量。
 
 关键原理：
 * 使用梯度下降方法迭代更新参数
 * 使用MSE衡量误差
-* 可学习参数$W, B$
+* 可学习参数 $W, B$ 
 
 # 理论推导及矩阵计算
 
@@ -18,15 +18,15 @@
 ### 主要公式
 
 **单个样本点**：
-* 线性映射：$y = wx + b$
-* 损失计算：$loss = \sum_{i}^{n} (y - (wx + b))^2$
+* 线性映射： $y = wx + b$
+* 损失计算： $loss = \sum_{i}^{n} (y - (wx + b))^2$
 * 偏导计算
     * $\frac{\partial (loss)}{\partial w} = -2(y - (wx + b))x$
     * $\frac{\partial (loss)}{\partial b} = -2(y - (wx + b))$
 
 **矩阵形式**（堆叠N个样本点为列向量）
-* 线性映射：$Y = wX + b$
-* 损失计算：$loss = \frac{1}{N}\textbf{1}^T(Y - (wX + b))^2$
+* 线性映射： $Y = wX + b$
+* 损失计算： $loss = \frac{1}{N}\textbf{1}^T(Y - (wX + b))^2$
 * 偏导计算：
     * $\frac{\partial (loss)}{\partial w} = -\frac{2}{N}(Y - (wX + b)) \cdot X$ 一维向量用点积
     * $\frac{\partial (loss)}{\partial b} = -\frac{2}{N}(Y - (wX + b))\cdot \textbf{1}$
@@ -54,16 +54,16 @@ Tips:
 ### 公式
 
 **单个样本点**：
-* 线性映射：$y = \sum_i^n w_ix_i + b$
-* 损失计算：$loss = \sum_{i}^{n} (y - (\sum_i^n w_ix_i + b))^2$
+* 线性映射： $y = \sum_i^n w_ix_i + b$
+* 损失计算： $loss = \sum_{i}^{n} (y - (\sum_i^n w_ix_i + b))^2$
 * 偏导计算
     * $\frac{\partial (loss)}{\partial w_i} = -2(y - (\sum_i^n w_ix_i + b))x_i$
     * $\frac{\partial (loss)}{\partial b} = -2(y - (wx + b))$
 
 
 **矩阵形式**（堆叠N个样本点为列向量）
-* 线性映射：$Y = X @ W + b$
-* 损失计算：$loss = \frac{1}{N}\textbf{1}^T(Y - (XW + b))^2$
+* 线性映射： $Y = X @ W + b$
+* 损失计算： $loss = \frac{1}{N}\textbf{1}^T(Y - (XW + b))^2$
 * 偏导计算：
     * $\frac{\partial (loss)}{W} = -\frac{2}{N}(Y - (XW + b)) \cdot X$
         * $\frac{\partial (loss)}{\partial w_i} = -\frac{2}{N}(Y - (XW + b)) \cdot X_{[:, i]}$
@@ -71,7 +71,7 @@ Tips:
 
 
 **维度分析**
-* 线性映射:$Y_{(N, 1)}= X_{(N, f)} @ W_{(f, 1)}$
+* 线性映射: $Y_{(N, 1)}= X_{(N, f)} @ W_{(f, 1)}$
 * 损失: $loss_{标量} = \textbf{1}^TY_(WX + b)$
 * W偏导计算：$dW_{(f, 1)} = -\frac{2}{N} X_{(f, N)}^T \cdot(Y_{(N, 1)} - \hat Y_{(N, 1)})$ 广播点积
     * $dw_i = -\frac{2}{N} (Y_{(N, 1)} - \hat Y_{(N, 1)}) \cdot X_{[:, i],(N, 1)}$
@@ -124,9 +124,9 @@ hyperparams = {
 
 ![](results/regression_2D_results_bac.png)
 
-一个有趣的现象是，$w_1$不是直接逼近真值，而是先上升再回降
+一个有趣的现象是， $w_1$不是直接逼近真值，而是先上升再回降
 
-暂留问题，能否通过公式推导找到$w_1$变换曲线的极大值点发生了什么
+暂留问题，能否通过公式推导找到 $w_1$变换曲线的极大值点发生了什么
 
 
 # 讨论
