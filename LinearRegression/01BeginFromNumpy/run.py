@@ -49,13 +49,56 @@ class Linear_Regression_Model:
             if epoch % log_interval == 0 or epoch == epochs - 1:
                 print(f"Epoch {epoch}, Loss: {loss:.4f}, w: {self.w:.4f}, b: {self.b:.4f}")
 
-        
+
+class Linear_Regression_Model_MultiVar:
+    def __init__(self, feature_dim: int):
+        # 初始化模型参数
+        self.w = np.zeros((feature_dim, 1))
+        self.b = 0.0
+
+        # 保存训练过程信息，用于绘图
+        self.loss_history = []
+        self.w_history = []
+        self.b_history = []
+        self.dw_history = []
+        self.db_history = []
+
+    def predict(self, X):
+        # 预测函数
+        return X @ self.w + self.b
+    
+    def fit(self, X, Y, lr = 1e-3, epochs = 1000, log_interval = 100):
+        # 训练函数，使用梯度下降法
+        print("Starting training...")
+        print(f"Initial parameters: w^T = {self.w.T}, b = {self.b}")
+        print(f"Learning rate: {lr}, Epochs: {epochs}")
+        print(f"Initial Loss: {np.mean((Y - self.predict(X)) ** 2):.4f}")
+        for epoch in range(epochs):
+            Y_pred = self.predict(X)
+            # 计算梯度 MSE
+            dw = -2 * np.dot(X.T, (Y - Y_pred)) / len(Y)
+            db = -2 * np.mean(Y - Y_pred)
+            # 更新参数
+            self.w -= lr * dw
+            self.b -= lr * db
+
+            # 计算并记录损失
+            loss = np.mean((Y - Y_pred) ** 2)
+            self.loss_history.append(loss)
+            self.w_history.append(self.w.copy())
+            self.b_history.append(self.b)
+            self.dw_history.append(dw.copy())
+            self.db_history.append(db)
+            if epoch % log_interval == 0 or epoch == epochs - 1:
+                print(f"Epoch {epoch}, Loss: {loss:.4f}, w^T: {self.w.T}, b: {self.b}")
+
 def make_LinearData(Sample_num: int, Feature_dim : int = 1, Noise_level: float = 0.0, set_w: float = 4.57, set_b: float = 0.64):
     """
     生成线性回归数据集
     """
+    set_w = np.array(set_w).reshape(Feature_dim, 1)
     X = np.random.rand(Sample_num, Feature_dim) * 10
-    Y = set_w * X + set_b + Noise_level * np.random.randn(Sample_num, Feature_dim)
+    Y =  X @ set_w + set_b + Noise_level * np.random.randn(Sample_num, 1)
     return X, Y
 
 # 主函数
@@ -63,10 +106,11 @@ def main():
     # 设置超参数
     hyperparams = {
         # 数据
-        "set_w": 4.57,
+        "feature_dim": 2,
+        # "set_w": 4.57,
+        "set_w": [10.57, 2.13],
         "set_b": 0.64,
         "sample_num": 100,
-        "feature_dim": 1,
         "noise_level": 0.1,
         # 训练
         "lr": 1e-3,
@@ -83,16 +127,21 @@ def main():
     
     # 训练模型
     lr, epochs = hyperparams["lr"], hyperparams["epochs"]
+    log_interval = hyperparams["log_interval"]
     if feature_dim == 1:
         model = Linear_Regression_Model()
     else:         # 多变量线性回归模型
-        print("Only single variable linear regression is supported.")
-        return
+        model = Linear_Regression_Model_MultiVar(feature_dim)
+    model.fit(X, Y, lr=lr, epochs=epochs, log_interval=log_interval)
     print(f"Trained parameters: w = {model.w}, b = {model.b}")
 
     # 画图
     plot_toolkit = PlotToolkit()
-    plot_toolkit.plot_regression_results(X, Y, model, hyperparams)
+    if feature_dim == 1:
+        plot_toolkit.plot_regression_results(X, Y, model, hyperparams)
+    elif feature_dim == 2:
+        plot_toolkit.plot_regression_results_2D(X, Y, model, hyperparams)
+    
 
 if __name__ == "__main__":
     main()

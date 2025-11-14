@@ -73,49 +73,41 @@ class PlotToolkit:
 
         fig = plt.figure(figsize=(12, 10))
 
-        # 子图1: 数据点与回归线
-        # ax1 = fig.add_subplot(2, 2, 1)
-        # ax1.scatter(X, Y, color='blue', label='Data Points')
-        # x_line = np.linspace(np.min(X), np.max(X), 100)
-        # y_line = model.w * x_line + model.b
-        # ax1.plot(x_line, y_line, color='red', label='Regression Line')
-        # ax1.set_xlabel('X')
-        # ax1.set_ylabel('Y')
-        # ax1.set_title('Linear Regression Results')
-        # ax1.legend()
+        dw_history = np.concatenate(model.dw_history, axis=1).T # (epochs, feature_dim)
+        w_history = np.concatenate(model.w_history, axis=1).T # (epochs, feature_dim)
 
-        # 子图2: 损失下降曲线
-        ax2 = fig.add_subplot(2, 2, 1)
-        ax2.plot(range(len(model.loss_history)), model.loss_history, color='green', label='Loss')
-        ax2.plot(range(len(model.dw_history)), model.dw_history[:,0], color='orange', label='Gradient of w0')
-        ax2.plot(range(len(model.dw_history)), model.dw_history[:,1], color='red', label='Gradient of w1')
-        ax2.plot(range(len(model.db_history)), model.db_history, color='purple', label='Gradient of b')
+        # 子图1: 损失下降曲线
+        ax1 = fig.add_subplot(2, 2, 1)
+        ax1.plot(range(len(model.loss_history)), model.loss_history, color='green', label='Loss')
+        ax1.plot(range(len(model.dw_history)), dw_history[:,0], color='orange', label='Gradient of w0')
+        ax1.plot(range(len(model.dw_history)), dw_history[:,1], color='red', label='Gradient of w1')
+        ax1.plot(range(len(model.db_history)), model.db_history, color='purple', label='Gradient of b')
+        ax1.set_xlabel('Epochs')
+        ax1.set_ylabel('Loss')
+        ax1.legend()
+        ax1.set_title('Loss Decrease Over Epochs and W[:2]')
+
+        # 子图2: 参数变化曲线
+        ax2 = fig.add_subplot(2, 2, 3)
+        ax2.plot(range(len(w_history[:,0])), w_history[:,0], color='orange', label='w0')
+        ax2.plot(range(len(w_history[:,1])), w_history[:,1], color='red', label='w1')
+        ax2.plot(range(len(model.b_history)), model.b_history, color='purple', label='b')
+        ax2.hlines(hyperparams["set_w"][0], 0, len(w_history), colors='orange', linestyles='dashed', label='True w0')
+        ax2.hlines(hyperparams["set_w"][1], 0, len(w_history), colors='red', linestyles='dashed', label='True w1')
+        ax2.hlines(hyperparams["set_b"], 0, len(model.b_history), colors='blue', linestyles='dashed', label='True b')
         ax2.set_xlabel('Epochs')
-        ax2.set_ylabel('Loss')
+        ax2.set_ylabel('Parameter Values')
+        ax2.set_title('Parameter Changes Over Epochs')
         ax2.legend()
-        ax2.set_title('Loss Decrease Over Epochs')
 
-        # 子图3: 参数变化曲线
-        ax3 = fig.add_subplot(2, 2, 3)
-        ax3.plot(range(len(model.w_history[:,0])), model.w_history[:,0], color='orange', label='w0')
-        ax3.plot(range(len(model.w_history[:,1])), model.w_history[:,1], color='red', label='w1')
-        ax3.plot(range(len(model.b_history)), model.b_history, color='purple', label='b')
-        ax3.hlines(hyperparams["set_w"][0], 0, len(model.w_history), colors='red', linestyles='dashed', label='True w0')
-        ax3.hlines(hyperparams["set_w"][1], 0, len(model.w_history), colors='red', linestyles='dashed', label='True w1')
-        ax3.hlines(hyperparams["set_b"], 0, len(model.b_history), colors='blue', linestyles='dashed', label='True b')
-        ax3.set_xlabel('Epochs')
-        ax3.set_ylabel('Parameter Values')
-        ax3.set_title('Parameter Changes Over Epochs')
-        ax3.legend()
-
-        # 子图4： 训练超参数设置
-        ax4 = fig.add_subplot(2, 2, 4)
-        ax4.axis('off')
-        textstr = f"w_predicted: {model.w:.4f}\nb_predicted: {model.b:.4f}\n"
+        # 子图3： 训练超参数设置
+        ax3 = fig.add_subplot(2, 2, 4)
+        ax3.axis('off')
+        textstr = f"w_predicted^T: {model.w.T}\nb_predicted: {model.b:.4f}\n"
         for k, v in hyperparams.items():
             textstr += f"{k}: {v}\n"
-        ax4.text(0.1, 0.5, textstr, fontsize=12, verticalalignment='center')
-        ax4.set_title('Training Parameters')
+        ax3.text(0.1, 0.5, textstr, fontsize=12, verticalalignment='center')
+        ax3.set_title('Training Parameters')
 
-        plt.savefig(f"{self.save_dir}/regression_results.png")
+        plt.savefig(f"{self.save_dir}/regression_2D_results.png")
         plt.close()
